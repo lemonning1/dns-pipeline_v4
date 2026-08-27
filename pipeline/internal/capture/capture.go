@@ -20,6 +20,7 @@ type PacketCapture struct {
 func NewPacketCapture(cfg *config.CollectorConfig) (*PacketCapture, error) {
 	device := cfg.Device
 	if device == "" {
+		fmt.Println("未配置网卡，开始自动配置")
 		devices, err := pcap.FindAllDevs()
 		if err != nil {
 			fmt.Println("查找网卡失败:", err)
@@ -27,7 +28,6 @@ func NewPacketCapture(cfg *config.CollectorConfig) (*PacketCapture, error) {
 		}
 		for _, d := range devices {
 			if d.Name != "lo" && len(d.Addresses) > 0 {
-				fmt.Println("找到网卡:", d.Name)
 				device = d.Name
 				break
 			}
@@ -36,6 +36,7 @@ func NewPacketCapture(cfg *config.CollectorConfig) (*PacketCapture, error) {
 			return nil, fmt.Errorf("未找到可用的网卡")
 		}
 	}
+	fmt.Println("配置网卡:", device)
 
 	snaplen := cfg.SnapLen
 	if snaplen <= 0 {

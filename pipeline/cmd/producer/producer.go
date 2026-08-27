@@ -34,7 +34,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer cap.Close()
-	//创建生产者实例
+
 	prod, err := kafka.NewProducer(cfg.Pipeline.Kafka)
 	if err != nil {
 		log.Fatal(err)

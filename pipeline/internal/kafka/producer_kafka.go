@@ -33,13 +33,14 @@ func (p *Producer) Send(query *model.DNSQuery) error {
 	if err != nil {
 		return err
 	}
-	return p.p.Produce(&confluent.Message{
+	message := confluent.Message{
 		TopicPartition: confluent.TopicPartition{
 			Topic:     &p.topic,
 			Partition: confluent.PartitionAny,
 		},
 		Value: data,
-	}, nil)
+	}
+	return p.p.Produce(&message, nil)
 }
 func (prod *Producer) Close() {
 	prod.p.Flush(5000) // 等待未发送完的消息
