@@ -1,0 +1,102 @@
+# ClickHouse 教学集群：1 Keeper + 后面会加的 2 个副本
+# 建议用独立项目名，避免和 Kafka 的 compose 挤在同一 project：
+#   sudo docker compose -p ch-cluster -f compose.clickhouse.yaml up -d
+#
+# 不要对本文件使用 --remove-orphans，否则可能删掉同目录下其它 compose 起的容器。
+
+services:
+  ch-keeper:
+    image: clickhouse/clickhouse-keeper:24.8
+    container_name: ch-keeper
+    hostname: ch-keeper
+    volumes:
+      - ./deploy/clickhouse/keeper/keeper_config.xml:/etc/clickhouse-keeper/keeper_config.xml:ro
+    ports:
+      - "9181:9181"
+
+  ch-01:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: ch-01
+    hostname: ch-01
+    depends_on:
+      - ch-keeper
+    volumes:
+      - ./deploy/clickhouse/ch01/config.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ch01-data:/var/lib/clickhouse
+    ports:
+      - "9001:9000"
+      - "8124:8123"
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_DB: dnsdb
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  ch-02:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: ch-02
+    hostname: ch-02
+    depends_on:
+      - ch-keeper
+    volumes:
+      - ./deploy/clickhouse/ch02/config.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ch02-data:/var/lib/clickhouse
+    ports:
+      - "9002:9000"
+      - "8125:8123"
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_DB: dnsdb
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+  ch-03:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: ch-03
+    hostname: ch-03
+    depends_on:
+      - ch-keeper
+    volumes:
+      - ./deploy/clickhouse/ch03/config.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ch03-data:/var/lib/clickhouse
+    ports:
+      - "9003:9000"
+      - "8126:8123"
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_DB: dnsdb
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+  ch-04:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: ch-04
+    hostname: ch-04
+    depends_on:
+      - ch-keeper
+    volumes:
+      - ./deploy/clickhouse/ch04/config.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ch04-data:/var/lib/clickhouse
+    ports:
+      - "9004:9000"
+      - "8127:8123"
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_DB: dnsdb
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+volumes:
+  ch01-data:
+  ch02-data:
+  ch03-data:
+  ch04-data:

@@ -1,0 +1,15 @@
+FROM golang:1.26-bookworm
+
+
+WORKDIR /src
+
+COPY pipeline /src/pipeline
+COPY shared /src/shared
+COPY config /src/config
+
+WORKDIR /src/pipeline
+RUN go build -o /usr/local/bin/dns-consumer ./cmd/consumer/
+
+ENV CONFIG_PATH=/src/config/pipeline.yaml
+CMD ["/usr/local/bin/dns-consumer"]
+

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS 流量监控 v4</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>DNS 流量监控 v4</h1>
+        <div class="search-box">
+            <input type="text" id="domainInput" placeholder="输入域名搜索">
+            <select id="qrFilter" onchange="onFilterChange()">
+                <option value="all">全部方向</option>
+                <option value="0">仅请求</option>
+                <option value="1">仅响应</option>
+            </select>
+            <button class="btn-primary" onclick="searchDomain()">查询</button>
+            <button class="btn-secondary" onclick="loadLatest()">查询全部</button>
+        </div>
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>域名</th>
+                    <th>类型</th>
+                    <th>方向</th>
+                    <th>CNAME 链</th>
+                    <th>响应 IP</th>
+                    <th>TTL</th>
+                    <th>状态</th>
+                    <th>时间</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody">
+                <tr><td colspan="8" class="empty-row">加载中...</td></tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button id="prevPage" class="btn-secondary" onclick="prevPage()">上一页</button>
+            <span id="pageInfo">第 1 / 1 页，共 0 条</span>
+            <button id="nextPage" class="btn-secondary" onclick="nextPage()">下一页</button>
+            <label class="page-jump">
+                跳转到
+                <input id="pageJump" type="number" min="1" value="1" />
+                页
+            </label>
+            <button class="btn-secondary" onclick="goToPage()">确定</button>
+        </div>
+    </div>
+    <script src="/js/app.js"></script>
+</body>
+</html>

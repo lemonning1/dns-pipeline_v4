@@ -1,0 +1,16 @@
+FROM golang:1.26-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends libpcap-dev && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+COPY pipeline /src/pipeline
+COPY shared /src/shared
+COPY config /src/config
+
+WORKDIR /src/pipeline
+
+RUN go build -o /usr/local/bin/dns-producer ./cmd/producer/
+
+ENV CONFIG_PATH=/src/config/pipeline.yaml
+CMD ["/usr/local/bin/dns-producer"]

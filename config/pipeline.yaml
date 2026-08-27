@@ -1,0 +1,36 @@
+pipeline:
+  database:
+    host: 127.0.0.1:9001,127.0.0.1:9002
+    port: 9001
+    user: default
+    dbname: dnsdb
+
+  kafka:
+    brokers:
+      - 127.0.0.1:19092
+      - 127.0.0.1:19093
+      - 127.0.0.1:19094
+    topic: dns_topic
+    group_id: dns_group
+    auto_offset_reset: earliest
+
+  collector:
+    device: ""
+    snaplen: 1600
+    filter: udp and port 53
+
+  producer_log:
+    level: info
+    file: logs/producer.log
+    max_size: 50
+    max_backups: 5
+    max_age: 7
+    compress: true
+
+  consumer_log:
+    level: info
+    file: logs/consumer.log
+    max_size: 50
+    max_backups: 5
+    max_age: 7
+    compress: true

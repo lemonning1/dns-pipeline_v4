@@ -1,0 +1,14 @@
+FROM golang:1.26-bookworm
+
+WORKDIR /src
+
+COPY api /src/api
+COPY shared /src/shared
+COPY config /src/config
+
+WORKDIR /src/api
+RUN go build -o /usr/local/bin/dns-api ./cmd/api/
+
+ENV CONFIG_PATH=/src/config/api.yaml
+EXPOSE 8080
+CMD ["/usr/local/bin/dns-api"]
