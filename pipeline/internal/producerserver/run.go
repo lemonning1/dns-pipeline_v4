@@ -19,6 +19,15 @@ type sender interface {
 
 func Run(ctx context.Context, cap packetSource, prod sender) error {
 	packets := cap.Packets()
+	jobs := make(chan gopacket.Packet, 128)
+	go func() {
+
+		for packet := range jobs {
+			processPacket(prod, packet)
+		}
+	}()
+
+	defer close(jobs)
 	for {
 		select {
 		case <-ctx.Done():
@@ -30,20 +39,26 @@ func Run(ctx context.Context, cap packetSource, prod sender) error {
 				logger.Info("抓包通道已关闭")
 				return nil
 			}
-			records := parse.FromPacket(packet)
-			if len(records) == 0 {
-				continue
-			}
-			for _, record := range records {
-				if record == nil {
-					continue
-				}
-				if err := prod.Send(record); err != nil {
-					logger.Error("发送至kafka失败: domain=%s err=%v", record.Domain, err)
-					continue
-				}
-				logger.Debug("已发送 record: domain=%s", record.Domain)
+
+			select {
+			case jobs <- packet:
+			case <-ctx.Done():
+				logger.Info("采集器暂停")
+				return nil
 			}
 		}
+	}
+}
+func processPacket(prod sender, packet gopacket.Packet) {
+	records := parse.FromPacket(packet)
+	for _, record := range records {
+		if record == nil {
+			continue
+		}
+		if err := prod.Send(record); err != nil {
+			logger.Error("发送至kafka失败: domain=%s err=%v", record.Domain, err)
+			continue
+		}
+		logger.Debug("已发送 record: domain=%s", record.Domain)
 	}
 }
