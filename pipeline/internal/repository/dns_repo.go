@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"shared/model"
+	"strings"
 	"time"
 )
 
@@ -14,8 +15,6 @@ func NewDNSRepo(db *sql.DB) *DNSRepo {
 	return &DNSRepo{db: db}
 }
 
-// EnsureTable 在 dns_cluster（1 分片 2 副本）上建本地复制表 + 分布式表。
-// 应用读写表名仍是 dns_queries_v4（Distributed）。
 func (d *DNSRepo) EnsureTable() error {
 	_, err := d.db.Exec(`
 		CREATE TABLE IF NOT EXISTS dns_queries_v4_local ON CLUSTER dns_cluster
@@ -58,5 +57,38 @@ func (d *DNSRepo) InsertDNSQuery(query *model.DNSQuery) error {
 		INSERT INTO dns_queries_v4 (id, domain, qtype, qr, rcode, cnamechain, responseips, ttl, created_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`, id, query.Domain, query.QType, query.QR, query.RCode, query.Cnamechain, query.ResponseIPs, query.TTL, createdAt)
+	return err
+}
+func (d *DNSRepo) InsertBatch(queries []*model.DNSQuery) error {
+	if len(queries) == 0 {
+		return nil
+	}
+
+	placeholders := make([]string, 0, len(queries))
+	args := make([]any, 0, len(queries)*9)
+
+	for _, query := range queries {
+		createdAt := query.CreatedAt
+		if createdAt.IsZero() {
+			createdAt = time.Now()
+		}
+		id := query.ID
+		if id == 0 {
+			id = int(time.Now().UnixNano() & 0x7fffffffffffffff)
+		}
+
+		placeholders = append(placeholders, "(?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		args = append(args,
+			id, query.Domain, query.QType, query.QR, query.RCode,
+			query.Cnamechain, query.ResponseIPs, query.TTL, createdAt,
+		)
+	}
+
+	sqlStr := `
+		INSERT INTO dns_queries_v4
+		(id, domain, qtype, qr, rcode, cnamechain, responseips, ttl, created_at)
+		VALUES ` + strings.Join(placeholders, ",")
+
+	_, err := d.db.Exec(sqlStr, args...)
 	return err
 }

@@ -8,6 +8,7 @@ import (
 type DNSWriter interface {
 	EnsureTable() error
 	InsertDNSQuery(query *model.DNSQuery) error
+	InsertBatch(queries []*model.DNSQuery) error
 }
 
 type DNSService struct {
@@ -24,4 +25,7 @@ func (s *DNSService) Ensure() error {
 
 func (s *DNSService) Insert(query *model.DNSQuery) error {
 	return s.repo.InsertDNSQuery(query)
+}
+func (s *DNSService) InsertBatch(queries []*model.DNSQuery) error {
+	return s.repo.InsertBatch(queries)
 }

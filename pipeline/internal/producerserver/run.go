@@ -20,13 +20,14 @@ type sender interface {
 func Run(ctx context.Context, cap packetSource, prod sender) error {
 	packets := cap.Packets()
 	jobs := make(chan gopacket.Packet, 128)
-	go func() {
 
-		for packet := range jobs {
-			processPacket(prod, packet)
-		}
-	}()
-
+	for i := 0; i < 5; i++ {
+		go func() {
+			for packet := range jobs {
+				processPacket(prod, packet)
+			}
+		}()
+	}
 	defer close(jobs)
 	for {
 		select {

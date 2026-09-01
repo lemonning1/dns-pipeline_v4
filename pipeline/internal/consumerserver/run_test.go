@@ -35,7 +35,9 @@ func (f *fakeInserter) Insert(*model.DNSQuery) error {
 	f.n++
 	return f.err
 }
-
+func (f *fakeInserter) InsertBatch([]*model.DNSQuery) error {
+	return f.err
+}
 func TestRun_stop(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

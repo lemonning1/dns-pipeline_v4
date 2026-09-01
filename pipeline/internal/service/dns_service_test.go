@@ -8,13 +8,17 @@ import (
 )
 
 type stubWriter struct {
-	ensureErr error
-	insertErr error
+	ensureErr      error
+	insertErr      error
+	insertBatchErr error
 }
 
 func (s stubWriter) EnsureTable() error { return s.ensureErr }
 func (s stubWriter) InsertDNSQuery(*model.DNSQuery) error {
 	return s.insertErr
+}
+func (s stubWriter) InsertBatch([]*model.DNSQuery) error {
+	return s.insertBatchErr
 }
 
 func TestEnsureAndInsert(t *testing.T) {
