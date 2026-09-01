@@ -27,15 +27,18 @@ func (f *fakeReader) Read(time.Duration) (*model.DNSQuery, error) {
 }
 
 type fakeInserter struct {
-	err error
-	n   int
+	err        error
+	batchCalls int
+	batchTotal int
 }
 
 func (f *fakeInserter) Insert(*model.DNSQuery) error {
-	f.n++
 	return f.err
 }
-func (f *fakeInserter) InsertBatch([]*model.DNSQuery) error {
+
+func (f *fakeInserter) InsertBatch(queries []*model.DNSQuery) error {
+	f.batchCalls++
+	f.batchTotal += len(queries)
 	return f.err
 }
 func TestRun_stop(t *testing.T) {
@@ -65,8 +68,11 @@ func TestRun_readInsert(t *testing.T) {
 	if err := Run(ctx, r, ins); err != nil {
 		t.Fatal(err)
 	}
-	if ins.n < 1 {
-		t.Fatalf("insert n=%d", ins.n)
+	if ins.batchCalls < 1 {
+		t.Fatalf("batchCalls=%d", ins.batchCalls)
+	}
+	if ins.batchTotal != 2 {
+		t.Fatalf("batchTotal=%d want 2", ins.batchTotal)
 	}
 }
 
@@ -86,7 +92,7 @@ func TestRun_insertOK(t *testing.T) {
 	if err := Run(ctx, r, ins); err != nil {
 		t.Fatal(err)
 	}
-	if ins.n < 1 {
-		t.Fatalf("n=%d", ins.n)
+	if ins.batchTotal != 1 {
+		t.Fatalf("batchTotal=%d want 1", ins.batchTotal)
 	}
 }

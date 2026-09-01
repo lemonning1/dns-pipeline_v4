@@ -57,3 +57,46 @@ func TestInsertDNSQuery_zeroTime(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestInsertBatch(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	now := time.Now()
+	qs := []*model.DNSQuery{
+		{ID: 1, Domain: "a.com", QType: 1, CreatedAt: now},
+		{ID: 2, Domain: "b.com", QType: 1, CreatedAt: now},
+	}
+
+	mock.ExpectExec("INSERT INTO dns_queries_v4").
+		WithArgs(
+			1, "a.com", 1, 0, 0, "", "", 0, now,
+			2, "b.com", 1, 0, 0, "", "", 0, now,
+		).
+		WillReturnResult(sqlmock.NewResult(2, 2))
+
+	if err := NewDNSRepo(db).InsertBatch(qs); err != nil {
+		t.Fatal(err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestInsertBatch_empty(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	if err := NewDNSRepo(db).InsertBatch(nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}

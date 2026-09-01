@@ -40,3 +40,17 @@ func TestEnsureAndInsert_err(t *testing.T) {
 		t.Fatal("期望 Insert 错误")
 	}
 }
+func TestInsertBatch(t *testing.T) {
+	svc := &DNSService{repo: stubWriter{}}
+	err := svc.InsertBatch([]*model.DNSQuery{{Domain: "a.com"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestInsertBatch_err(t *testing.T) {
+	svc := &DNSService{repo: stubWriter{insertBatchErr: errors.New("b")}}
+	if err := svc.InsertBatch([]*model.DNSQuery{{}}); err == nil {
+		t.Fatal("期望 InsertBatch 错误")
+	}
+}

@@ -32,16 +32,17 @@ func Run(ctx context.Context, cons reader, svc inserter) error {
 		}
 		if err := svc.InsertBatch(batch); err != nil {
 			logger.Error("批量入库失败: n=%d err=%v", len(batch), err)
-		} else {
-			logger.Debug("批量入库成功: n=%d", len(batch))
+			return
 		}
-		batch = batch[:0] // 清空，复用底层数组
+		logger.Debug("批量入库成功: n=%d", len(batch))
+		batch = batch[:0]
+
 	}
 
 	for {
 		select {
 		case <-ctx.Done():
-			flush() // 退出前把剩余写掉
+			flush()
 			logger.Info("消费者停止")
 			return nil
 
