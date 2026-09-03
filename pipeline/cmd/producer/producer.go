@@ -39,7 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logger.Info("生产者已创建,开始生产...")
+	logger.Infof("生产者已创建,开始生产...")
 	defer prod.Close()
 	//更干净的优雅退出
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

@@ -16,10 +16,10 @@ DNS流量抓取 → kafka → clickhouse → API/网页查询
 1. 环境变量:`.env`里自行设置CLICKHOUSE_PASSWORD;运行时 DB_PASSWORD
 2. 起 Kafka:`docker compose -f compose.kafka.yaml up -d`
 3. 起 Clickhouse:`docker compose -p ch-cluster -f compose.clickhouse.yaml up -d`
-4. 起producer / comsumer / api(根据实际使用的脚本或docker命令)
+4. 起producer / consumer / api(根据实际使用的脚本或docker命令)
 
 ## 配置说明
-- `confg/pipeline.yaml`、`config/api.yaml`
+- `config/pipeline.yaml`、`config/api.yaml`
 - Kafka 多地址、Clickhouse DSN / 多 host
 
 ## 集群说明
@@ -32,7 +32,5 @@ DNS流量抓取 → kafka → clickhouse → API/网页查询
 - 表在 default 不在dnsdb → 库名对齐
 
 ## 后续可做
-- consumer 批量写入
 - parse 函数优化 record 处理DNS多问题字段方式 
 - Grafana 统计图
-- 生产者 worker 池

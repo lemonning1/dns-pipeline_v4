@@ -40,10 +40,10 @@ func TestInit_stdoutOnly(t *testing.T) {
 	if currentLevel != LevelError {
 		t.Fatalf("level=%d", currentLevel)
 	}
-	Debug("should be dropped")
-	Info("should be dropped")
-	Warn("should be dropped")
-	Error("visible")
+	Debugf("should be dropped")
+	Infof("should be dropped")
+	Warnf("should be dropped")
+	Errorf("visible")
 }
 
 func TestInit_withFile(t *testing.T) {
@@ -57,7 +57,7 @@ func TestInit_withFile(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	Info("hello file")
+	Infof("hello file")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)

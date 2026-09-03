@@ -74,6 +74,7 @@ func (d *DNSRepo) InsertBatch(queries []*model.DNSQuery) error {
 		}
 		id := query.ID
 		if id == 0 {
+			// Consumer 侧已用 Kafka offset 赋 id；仅单测或未走 kafka 时兜底。
 			id = int(time.Now().UnixNano() & 0x7fffffffffffffff)
 		}
 

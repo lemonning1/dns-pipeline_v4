@@ -47,19 +47,19 @@ func Init(cfg config.LogConfig) error {
 	log.SetPrefix("")
 
 	if fileErr != nil {
-		Error("日志文件不可用: %v", fileErr)
+		Errorf("日志文件不可用: %v", fileErr)
 		return nil
 	}
-	Info("日志已启用 file=%s level=%s", cfg.File, cfg.Level)
+	Infof("日志已启用 file=%s level=%s", cfg.File, cfg.Level)
 	return nil
 }
 
-func Debug(format string, args ...any) { print(LevelDebug, "DEBUG", format, args...) }
-func Info(format string, args ...any)  { print(LevelInfo, "INFO", format, args...) }
-func Warn(format string, args ...any)  { print(LevelWarn, "WARN", format, args...) }
-func Error(format string, args ...any) { print(LevelError, "ERROR", format, args...) }
+func Debugf(format string, args ...any) { print(LevelDebug, "DEBUG", format, args...) }
+func Infof(format string, args ...any)  { print(LevelInfo, "INFO", format, args...) }
+func Warnf(format string, args ...any)  { print(LevelWarn, "WARN", format, args...) }
+func Errorf(format string, args ...any) { print(LevelError, "ERROR", format, args...) }
 
-func Fatal(format string, args ...any) {
+func Fatalf(format string, args ...any) {
 	print(LevelError, "FATAL", format, args...)
 	os.Exit(1)
 }
