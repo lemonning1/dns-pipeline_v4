@@ -13,6 +13,7 @@ import (
 	"shared/config"
 	"shared/logger"
 	"syscall"
+	"time"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 )
@@ -40,6 +41,7 @@ func main() {
 	for {
 		if err := db.Ping(); err != nil {
 			logger.Warnf("无法连接到ClickHouse服务器:%v", err)
+			time.Sleep(5 * time.Second)
 		} else {
 			break
 		}

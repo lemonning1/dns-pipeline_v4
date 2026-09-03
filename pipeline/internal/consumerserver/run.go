@@ -33,7 +33,7 @@ func Run(ctx context.Context, cons kafkaClient, svc inserter) error {
 	)
 
 	batch := make([]batchItem, 0, batchSize)
-	ticker := time.NewTicker(5 * flushInterval)
+	ticker := time.NewTicker(flushInterval)
 	defer ticker.Stop()
 
 	// flush：先批量写 ClickHouse，成功后再按分区 commit Kafka offset。
