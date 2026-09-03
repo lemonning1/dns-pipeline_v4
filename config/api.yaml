@@ -1,6 +1,6 @@
 api:
   database:
-    host: ch-01:9000,ch-02:9000
+    host: localhost:9001,localhost:9002
     port: 9000
     user: default
     dbname: dnsdb

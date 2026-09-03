@@ -37,14 +37,14 @@ func Run(ctx context.Context, handler *handler.DNSHandler, addr string) error {
 	}
 	errCh := make(chan error, 1)
 	go func() {
-		logger.Info("API 已启动，监听 %s", addr)
+		logger.Infof("API 已启动，监听 %s", addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 		}
 	}()
 	select {
 	case <-ctx.Done():
-		logger.Info("API 收到退出信号,正在关闭...")
+		logger.Infof("API 收到退出信号,正在关闭...")
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		return srv.Shutdown(shutdownCtx)

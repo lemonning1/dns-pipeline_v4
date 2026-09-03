@@ -5,6 +5,7 @@ import "time"
 type DNSQuery struct {
 	ID          int       `json:"id"`
 	Domain      string    `json:"domain"`
+	ClientIp    string    `json:clientip`
 	QType       int       `json:"qtype"`
 	QR          int       `json:"qr"`
 	RCode       int       `json:"rcode"`

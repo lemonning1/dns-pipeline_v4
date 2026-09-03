@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"shared/config"
 	"shared/logger"
@@ -34,10 +35,18 @@ func main() {
 
 	db, err := sql.Open("clickhouse", cfg.API.Database.DSN())
 	if err != nil {
-		log.Fatal("数据库连接失败: ", err)
+		log.Fatal("DSN格式错误: ", err)
 	}
 	defer db.Close()
+	for {
+		if err := db.Ping(); err != nil {
+			logger.Warnf("无法连接到ClickHouse服务器:%v", err)
+			time.Sleep(5 * time.Second)
+		} else {
+			break
+		}
 
+	}
 	repo := repository.NewDNSRepo(db)
 	svc := service.NewDNSService(repo)
 	h := handler.NewDNSHandler(svc)
