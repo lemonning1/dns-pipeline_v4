@@ -21,6 +21,7 @@ func (d *DNSRepo) EnsureTable() error {
 		(
 			id UInt64,
 			domain String,
+			clientip String,
 			qtype Int32,
 			qr Int32,
 			rcode Int32,
@@ -54,9 +55,9 @@ func (d *DNSRepo) InsertDNSQuery(query *model.DNSQuery) error {
 		id = int(time.Now().UnixNano() & 0x7fffffffffffffff)
 	}
 	_, err := d.db.Exec(`
-		INSERT INTO dns_queries_v4 (id, domain, qtype, qr, rcode, cnamechain, responseips, ttl, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, id, query.Domain, query.QType, query.QR, query.RCode, query.Cnamechain, query.ResponseIPs, query.TTL, createdAt)
+		INSERT INTO dns_queries_v4 (id, domain, clientip, qtype, qr, rcode, cnamechain, responseips, ttl, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, id, query.Domain, query.ClientIP, query.QType, query.QR, query.RCode, query.Cnamechain, query.ResponseIPs, query.TTL, createdAt)
 	return err
 }
 func (d *DNSRepo) InsertBatch(queries []*model.DNSQuery) error {
@@ -65,7 +66,7 @@ func (d *DNSRepo) InsertBatch(queries []*model.DNSQuery) error {
 	}
 
 	placeholders := make([]string, 0, len(queries))
-	args := make([]any, 0, len(queries)*9)
+	args := make([]any, 0, len(queries)*10)
 
 	for _, query := range queries {
 		createdAt := query.CreatedAt
@@ -78,16 +79,16 @@ func (d *DNSRepo) InsertBatch(queries []*model.DNSQuery) error {
 			id = int(time.Now().UnixNano() & 0x7fffffffffffffff)
 		}
 
-		placeholders = append(placeholders, "(?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		placeholders = append(placeholders, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 		args = append(args,
-			id, query.Domain, query.QType, query.QR, query.RCode,
+			id, query.Domain, query.ClientIP, query.QType, query.QR, query.RCode,
 			query.Cnamechain, query.ResponseIPs, query.TTL, createdAt,
 		)
 	}
 
 	sqlStr := `
 		INSERT INTO dns_queries_v4
-		(id, domain, qtype, qr, rcode, cnamechain, responseips, ttl, created_at)
+		(id, domain, clientip, qtype, qr, rcode, cnamechain, responseips, ttl, created_at)
 		VALUES ` + strings.Join(placeholders, ",")
 
 	_, err := d.db.Exec(sqlStr, args...)

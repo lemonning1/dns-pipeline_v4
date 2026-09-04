@@ -21,16 +21,29 @@ func FromPacket(pkt gopacket.Packet) []*model.DNSQuery {
 	var records []*model.DNSQuery
 	for i := range dns.Questions {
 		record := ParseDNSQuestion(dns, &dns.Questions[i])
+
 		if record != nil {
+			record.ClientIP = clientIPFromPacket(pkt, dns.QR)
 			records = append(records, record)
 		}
 	}
 	return records
 }
+func clientIPFromPacket(pkt gopacket.Packet, qr bool) string {
+	nl := pkt.NetworkLayer()
+	if nl == nil {
+		return ""
+	}
+	flow := nl.NetworkFlow()
+	src, dst := flow.Src().String(), flow.Dst().String()
+	if !qr {
+		return src
+	}
+	return dst
+}
 
 func ParseDNSQuestion(dns *layers.DNS, q *layers.DNSQuestion) *model.DNSQuery {
 	domain := strings.TrimSuffix(string(q.Name), ".")
-
 	record := &model.DNSQuery{
 		Domain:    domain,
 		QType:     int(q.Type),

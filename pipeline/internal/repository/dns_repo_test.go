@@ -35,9 +35,9 @@ func TestInsertDNSQuery(t *testing.T) {
 	}
 	defer db.Close()
 
-	q := &model.DNSQuery{Domain: "a.com", QType: 1, CreatedAt: time.Now()}
+	q := &model.DNSQuery{Domain: "a.com", ClientIP: "1.2.3.4", QType: 1, CreatedAt: time.Now()}
 	mock.ExpectExec("INSERT INTO dns_queries_v4").
-		WithArgs(sqlmock.AnyArg(), q.Domain, q.QType, q.QR, q.RCode, q.Cnamechain, q.ResponseIPs, q.TTL, sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), q.Domain, q.ClientIP, q.QType, q.QR, q.RCode, q.Cnamechain, q.ResponseIPs, q.TTL, sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	if err := NewDNSRepo(db).InsertDNSQuery(q); err != nil {
 		t.Fatal(err)
@@ -67,14 +67,14 @@ func TestInsertBatch(t *testing.T) {
 
 	now := time.Now()
 	qs := []*model.DNSQuery{
-		{ID: 1, Domain: "a.com", QType: 1, CreatedAt: now},
-		{ID: 2, Domain: "b.com", QType: 1, CreatedAt: now},
+		{ID: 1, Domain: "a.com", ClientIP: "1.1.1.1", QType: 1, CreatedAt: now},
+		{ID: 2, Domain: "b.com", ClientIP: "2.2.2.2", QType: 1, CreatedAt: now},
 	}
 
 	mock.ExpectExec("INSERT INTO dns_queries_v4").
 		WithArgs(
-			1, "a.com", 1, 0, 0, "", "", 0, now,
-			2, "b.com", 1, 0, 0, "", "", 0, now,
+			1, "a.com", "1.1.1.1", 1, 0, 0, "", "", 0, now,
+			2, "b.com", "2.2.2.2", 1, 0, 0, "", "", 0, now,
 		).
 		WillReturnResult(sqlmock.NewResult(2, 2))
 
