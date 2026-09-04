@@ -25,6 +25,7 @@ func setupRouter(h *handler.DNSHandler) *gin.Engine {
 		c.Next()
 	})
 	r.GET("/api/dns", h.GetDNSRecords)
+	r.GET("/api/dns/top", h.GetTopDomains)
 	return r
 }
 

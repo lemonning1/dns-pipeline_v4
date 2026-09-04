@@ -1,0 +1,19 @@
+api:
+  database:
+    host: ch-01:9000,ch-02:9000
+    port: 9000
+    user: default
+    dbname: dnsdb
+  
+  api:
+    host: "0.0.0.0"
+    port: "8080"
+    mode: release
+
+  log:
+    level: info
+    file: logs/api.log
+    max_size: 50
+    max_backups: 5
+    max_age: 7
+    compress: true

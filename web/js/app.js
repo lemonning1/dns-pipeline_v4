@@ -4,6 +4,16 @@ let currentPage = 1;
 let totalPages = 1;
 
 window.onload = function () {
+    const hoursInput = document.getElementById("topHours");
+    if (hoursInput) {
+        hoursInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                loadTop();
+            }
+        });
+    }
+    loadTop();
     loadLatest();
 };
 
@@ -26,6 +36,93 @@ function buildAPIUrl() {
     params.set("page_size", DEFAULT_PAGE_SIZE);
 
     return "/api/dns?" + params.toString();
+}
+
+function loadTop() {
+    const hoursEl = document.getElementById("topHours");
+    const hours = hoursEl ? parseInt(hoursEl.value, 10) : 24;
+    const list = document.getElementById("topList");
+    if (!Number.isInteger(hours) || hours < 1 || hours > 24) {
+        if (list) {
+            list.innerHTML =
+                '<li class="top-empty status-error">请输入 1–24 的整数小时</li>';
+        }
+        return;
+    }
+    fetchTop("/api/dns/top?hours=" + encodeURIComponent(String(hours)));
+}
+
+function fetchTop(url) {
+    const list = document.getElementById("topList");
+    if (!list) {
+        return;
+    }
+    list.innerHTML = '<li class="top-empty">加载中...</li>';
+
+    fetch(url)
+        .then((res) => {
+            if (!res.ok) {
+                return res.json().then((data) => {
+                    throw new Error(data.error || "HTTP " + res.status);
+                }).catch((e) => {
+                    if (e.message && e.message.indexOf("HTTP") === 0) {
+                        throw e;
+                    }
+                    throw new Error(e.message || "HTTP " + res.status);
+                });
+            }
+            return res.json();
+        })
+        .then((data) => {
+            if (!Array.isArray(data)) {
+                throw new Error("返回数据格式错误");
+            }
+            renderTop(data);
+        })
+        .catch((err) => {
+            list.innerHTML =
+                '<li class="top-empty status-error">请求失败: ' +
+                escapeHtml(err.message) +
+                "</li>";
+        });
+}
+
+function renderTop(items) {
+    const list = document.getElementById("topList");
+    if (!items.length) {
+        list.innerHTML = '<li class="top-empty">该时间范围内没有 DNS 请求</li>';
+        return;
+    }
+
+    const max = Math.max(1, ...items.map((item) => Number(item.count) || 0));
+    list.innerHTML = items
+        .map((item, i) => {
+            const count = Number(item.count) || 0;
+            const pct = ((count / max) * 100).toFixed(2);
+            return (
+                '<li class="top-item">' +
+                '<span class="top-rank">' +
+                (i + 1) +
+                "</span>" +
+                '<div class="top-item-main">' +
+                '<div class="top-item-meta">' +
+                '<span class="top-item-name">' +
+                escapeHtml(item.name || "") +
+                "</span>" +
+                '<span class="top-item-count">' +
+                count +
+                "</span>" +
+                "</div>" +
+                '<span class="top-bar-track">' +
+                '<span class="top-bar" style="width:' +
+                pct +
+                '%"></span>' +
+                "</span>" +
+                "</div>" +
+                "</li>"
+            );
+        })
+        .join("");
 }
 
 function searchDomain() {

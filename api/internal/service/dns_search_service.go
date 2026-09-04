@@ -7,6 +7,7 @@ import (
 
 type DNSFinder interface {
 	FindByDomain(domain string, qr *int, page model.PageParams) ([]model.DNSQuery, int, error)
+	TopDomains(ddl string) ([]model.TopResult, error)
 }
 
 type DNSService struct {
@@ -28,4 +29,13 @@ func (s *DNSService) GetDNSRecords(domain string, qr *int, page model.PageParams
 		PageSize: page.PageSize,
 		Total:    total,
 	}, nil
+}
+
+func (s *DNSService) GetTopDomains(ddl string) ([]model.TopResult, error) {
+	queries, err := s.repo.TopDomains(ddl)
+	if err != nil {
+		return nil, err
+	}
+
+	return queries, nil
 }

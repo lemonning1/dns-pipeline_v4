@@ -14,17 +14,20 @@ import (
 
 type stubService struct {
 	result *model.PageResult
+	top    []model.TopResult
 	err    error
 }
 
 func (s stubService) GetDNSRecords(string, *int, model.PageParams) (*model.PageResult, error) {
 	return s.result, s.err
 }
-
+func (s stubService) GetTopDomains(ddl string) ([]model.TopResult, error) {
+	return s.top, s.err
+}
 func TestGetDNSRecords_200(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	h := &DNSHandler{service: stubService{
-		result: &model.PageResult{Items: []model.DNSQuery{}, Page: 1, PageSize: 20, Total: 0},
+		result: &model.PageResult{Items: []model.DNSQuery{}, Page: 1, PageSize: 20, Total: 0}, top: []model.TopResult{},
 	}}
 
 	r := gin.New()

@@ -18,7 +18,10 @@ type stubService struct{}
 func (stubService) GetDNSRecords(string, *int, model.PageParams) (*model.PageResult, error) {
 	return &model.PageResult{Items: []model.DNSQuery{}, Page: 1, PageSize: 20, Total: 0}, nil
 }
-
+func (stubService) GetTopDomains(string) ([]model.TopResult, error) {
+	items := []model.TopResult{}
+	return items, nil
+}
 func TestSetupRouter(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	h := handler.NewDNSHandler(stubService{})

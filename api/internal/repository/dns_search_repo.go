@@ -17,11 +17,11 @@ func (d *DNSRepo) FindByDomain(domain string, qr *int, page model.PageParams) ([
 	where := " WHERE 1=1 "
 	args := []any{}
 	if domain != "" {
-		where += " AND domain LIKE ?"
+		where += " AND domain LIKE ? "
 		args = append(args, "%"+domain+"%")
 	}
 	if qr != nil {
-		where += " AND qr = ?"
+		where += " AND qr = ? "
 		args = append(args, *qr)
 	}
 
@@ -65,4 +65,37 @@ func (d *DNSRepo) FindByDomain(domain string, qr *int, page model.PageParams) ([
 		results = []model.DNSQuery{}
 	}
 	return results, int(total), nil
+}
+
+func (d *DNSRepo) TopDomains(ddl string) ([]model.TopResult, error) {
+
+	topdomain := `SELECT domain,
+		count() AS cnt 
+		FROM dns_queries_v4 
+		WHERE created_at >= now() -INTERVAL ` + ddl + ` HOUR 
+		AND qr = 0 
+		GROUP BY domain 
+		ORDER BY cnt DESC
+		LIMIT 20;`
+	rows, err := d.db.Query(topdomain)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var results []model.TopResult
+	for rows.Next() {
+		var result model.TopResult
+		if err := rows.Scan(&result.Name, &result.Count); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if results == nil {
+		results = []model.TopResult{}
+	}
+	return results, nil
+
 }

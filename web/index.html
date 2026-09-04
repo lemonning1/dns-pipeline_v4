@@ -9,6 +9,23 @@
 <body>
     <div class="container">
         <h1>DNS 流量监控 v4</h1>
+        <section class="top-panel" aria-label="热门域名">
+            <div class="top-panel-head">
+                <div>
+                    <p class="top-kicker">实时聚合</p>
+                    <h2 class="top-title">top-domain</h2>
+                </div>
+                <div class="top-hours">
+                    <label for="topHours">近</label>
+                    <input id="topHours" type="number" min="1" max="24" value="24" step="1">
+                    <span>小时</span>
+                    <button type="button" class="btn-secondary" onclick="loadTop()">查询</button>
+                </div>
+            </div>
+            <ol id="topList" class="top-list">
+                <li class="top-empty">加载中...</li>
+            </ol>
+        </section>
         <div class="search-box">
             <input type="text" id="domainInput" placeholder="输入域名搜索">
             <select id="qrFilter" onchange="onFilterChange()">
